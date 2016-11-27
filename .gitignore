@@ -5,6 +5,8 @@ __pycache__/
 
 # C extensions
 *.so
+# R generated files 
+/rsconnect/
 *.csv
 *.bz2
 # Distribution / packaging

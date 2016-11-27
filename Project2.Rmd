@@ -1,21 +1,50 @@
 ---
-title: "Storm_Analysis"
+title: "Storm Data Analysis Across United States: What Events are Most Harmful for Population Health and Econmic Losses? "
 author: "Shuai"
 date: "11/23/2016"
 output: html_document
 ---
-## Synopsis
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-download and save the data
+## Synopsis
+The Na
+## Data Processing  
+There are several steps we would like to follow:
+1.  download and save the data as 'stormData.csv.bz2'.
 ```{r}
 data_link<-"https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2"
+download.file(data_link,destfile = 'stormData.csv.bz2')
 ```
+2.  The extracted csv file is as "stormData.csv". read the csv into data frame. Use data.table's fread() function to enable high efficiency csv reading.
+```{r}
+library(data.table)
+library(R.utils)
+if (!file.exists("stormData.csv")) {
+bunzip2("stormData.csv.bz2", "stormData.csv", remove = FALSE, skip = TRUE)
+} else {
+  print("file is already downloaded!")
+}
+raw_data<-fread("stormData.csv",header=T)
+```
+3.  Perform exploratory data analysis. Use summary() function to explore parameters.
+```{r}
+summary(raw_data)
+```
+4.  Data Preparation.  
+  To help analyze results directly related to required questions. I subset the original data into two indepndent dataset. The first question is : "Across the United States, which types of events (as indicated in the 𝙴𝚅𝚃𝚈𝙿𝙴 variable) are most harmful with respect to population health?". In order to answer what *"EVTYPE"* are most *"harmful"* related to *"population health"*. We need to find corresponding variables that are useful. Therefore, we subset the data (using subset() function to select variables of interest). The parameters of intertest are "EVTYPE, FATALITIES, INJURIES, REFUNM"
+  4.1 Population Health Data Preparation
+```{r}
+PeopleHealth<-subset(raw_data,select=c(EVTYPE,FATALITIES,INJURIES,REFNUM))
+PeopleHealthFull<-na.omit(PeopleHealth)#get full records
+```
+This PeopleHealthFull data is used for Results part.  
+  4.2 Economic Loss Data Preparation
+  Similar to 4.1, I subset the original data into a subset with variables of interest to answer questions -- "Across the United States, which types of events have the greatest economic consequences". These variables include:PROPDMG, PROPDMGEXP, CROPDMG
+```{r}
 
-## Data Processing  
-
+```
 ## Results  
 
 ### Across the United States, which types of events (as indicated in the 𝙴𝚅𝚃𝚈𝙿𝙴 variable) are most harmful with respect to population health?  
