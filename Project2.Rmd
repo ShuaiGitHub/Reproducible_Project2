@@ -45,7 +45,8 @@ This PeopleHealthFull data is used for Results part.
 ```{r}
 
 ```
-## Results  
+#econData<-subset(raw_data,select=c(EVTYPE,PROPDMG,PROPDMGEXP,CROPDMG,CROPDMGEXP,REFNUM))#econDataFull<-na.omit(econData)
+ Results  
 
 ### Across the United States, which types of events (as indicated in the 𝙴𝚅𝚃𝚈𝙿𝙴 variable) are most harmful with respect to population health?  
 
