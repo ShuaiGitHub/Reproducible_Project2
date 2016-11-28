@@ -8,16 +8,24 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Synopsis
+## Synopsis  
+The Nationa Weather Service (NWS) and National Oceanic & Atmospheric Administration (NOAA) together prepared the storm database for analyzing how natural disasters caused fatal injuries, property damages and crop damages. The records in this database is ranged from 1950 to 2011. Each record contains important information such as location, disater type, start time, end time, loss on property and crop damages, count on fatalities and injuries. Totally Over 900k records are included in the analysis.  
+
+This analysis focuses on answering two questions: 1) what type of disasters caused most counts of fatalities and injuries 2) what type of disasters caused most damanages in terms of economic measures. Results show that Tornado is most harmful to population health; it also caused most damages in terms of economic consequence.  
+
+Results suggest more research efforts should put on prediction and preparation for Tornado events.  
+
 ## Data Processing  
 There are several steps we would like to follow:
 1.  download and save the data as 'stormData.csv.bz2'.
-```{r}
+```{r,cache=TRUE}
 data_link<-"https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2"
+if (!file.exists("stormData.csv.bz2")){
 download.file(data_link,destfile = 'stormData.csv.bz2')
+}
 ```
 2.  The extracted csv file is as "stormData.csv". read the csv into data frame. Use data.table's fread() function to enable high efficiency csv reading.
-```{r}
+```{r, cache=TRUE}
 library(data.table)
 library(R.utils)
 if (!file.exists("stormData.csv")) {
@@ -50,31 +58,30 @@ econDataFull<-na.omit(econData)
 ### Across the United States, which types of events (as indicated in the 𝙴𝚅𝚃𝚈𝙿𝙴 variable) are most harmful with respect to population health?  
 We use histogram to answer this question. Remember PeopleHealth data stores all information we need.
 ```{r}
-PeopleHealth$People<-PeopleHealth$FATALITIES+PeopleHealth$INJURIES
 summaryCount<-aggregate(People~EVTYPE,PeopleHealth,FUN=sum)
-library(plyraltSummary<-aggregate(cbind(FATALITIES,INJURIES)~EVTYPE,PeopleHealth,FUN=sum)
-)
-summaryCount<-arrange(summaryCount,desc(People))
-top10Health<-head(summaryCount,10)
+altSummary<-aggregate(cbind(FATALITIES,INJURIES)~EVTYPE,PeopleHealth,FUN=sum)
+library(plyr)
+altSummary<-arrange(altSummary,desc(FATALITIES),desc(INJURIES))
+top10Health<-head(altSummary,10)
 ```
 
 Plot the top 10 event types that cause fatalites and injuries:
 ```{r}
 library(ggplot2)
 # Basic barplot
-p<-ggplot(data=top10Health, aes(x=reorder(EVTYPE,-People), y=People))+
-  geom_bar(stat="identity")+
+library(reshape2)
+melted_data<-melt(top10Health,id.vars="EVTYPE")
+p<-ggplot(melted_data,aes(x=variable,y=vreorder(EVTYPEl-value),=factor(gender)))+
+ variablebar(stat="identity")+
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
   xlab("Event Types")+
-  ylab("Total Fatalities and Injuries")+
-  ggtitle("Storms Events that are Most Harmful to Population Health")
-p
+  ylab("Crop and Property Damages (k Dollars)")+
+  ggtitle("Storms Events Have the Greatest Economic Consequences")
+print(p)
 ```
-### A+
-  theme_light()cross the United States, which types of events have the greatest economic consequences?
+### Across the United States, which types of events have the greatest economic consequences?
 ```{r}
-econDataFull$Loss<-as.numeric((econDataFull$PROPDMG))+as.numeric((econDataFull$CROPDMG))
-summaryEcon<-aggregate(Loss~EVTYPE,econDataFull,FUN=sum)
+summaryEcon<-aggregate(cbind(PROPDMG,CROPDMG)~EVTYPE,econDataFull,FUN=sum)
 library(plyr)
 summaryEcon<-arrange(summaryEcon,desc(Loss))
 top10Loss<-head(summaryEcon,10)
@@ -82,10 +89,9 @@ p<-ggplot(data=top10Loss, aes(x=reorder(EVTYPE,-Loss), y=Loss))+
   geom_bar(stat="identity")+
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
   xlab("Event Types")+
-  ylab("Total Crop Damages and Property Damages (kDollars)")+
+  ylab("Crop and Property Damages (k Dollars)")+
   ggtitle("Storms Events Have the Greatest Economic Consequences")
-p
+print(p)
 ```
-## Co+
-  theme_light()nclusion
-Base on analysis between storm event types and 
+## Conclusion
+Base on analysis between storm event types versus counts of fatalities and injuries, and event types versus damages to properties and corps, we suggest more research efforts should be put on Tornado events.
