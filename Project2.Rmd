@@ -1,5 +1,5 @@
 ---
-title: "Storm Data Analysis Across United States: What Events are Most Harmful for Population Health and Econmic Losses? "
+title: "Storm Data Analysis Across United States: What Events are Accountable for Population Health and Econmic Losses? "
 author: "Shuai"
 date: "11/23/2016"
 output: html_document
@@ -9,7 +9,6 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Synopsis
-The Na
 ## Data Processing  
 There are several steps we would like to follow:
 1.  download and save the data as 'stormData.csv.bz2'.
@@ -43,11 +42,50 @@ This PeopleHealthFull data is used for Results part.
   4.2 Economic Loss Data Preparation
   Similar to 4.1, I subset the original data into a subset with variables of interest to answer questions -- "Across the United States, which types of events have the greatest economic consequences". These variables include:PROPDMG, PROPDMGEXP, CROPDMG
 ```{r}
-
+econData<-subset(raw_data,select=c(EVTYPE,PROPDMG,PROPDMGEXP,CROPDMG,CROPDMGEXP,REFNUM))
+econDataFull<-na.omit(econData)
 ```
-#econData<-subset(raw_data,select=c(EVTYPE,PROPDMG,PROPDMGEXP,CROPDMG,CROPDMGEXP,REFNUM))#econDataFull<-na.omit(econData)
- Results  
+## Results  
 
 ### Across the United States, which types of events (as indicated in the 𝙴𝚅𝚃𝚈𝙿𝙴 variable) are most harmful with respect to population health?  
+We use histogram to answer this question. Remember PeopleHealth data stores all information we need.
+```{r}
+PeopleHealth$People<-PeopleHealth$FATALITIES+PeopleHealth$INJURIES
+summaryCount<-aggregate(People~EVTYPE,PeopleHealth,FUN=sum)
+library(plyraltSummary<-aggregate(cbind(FATALITIES,INJURIES)~EVTYPE,PeopleHealth,FUN=sum)
+)
+summaryCount<-arrange(summaryCount,desc(People))
+top10Health<-head(summaryCount,10)
+```
 
-### Across the United States, which types of events have the greatest economic consequences?
+Plot the top 10 event types that cause fatalites and injuries:
+```{r}
+library(ggplot2)
+# Basic barplot
+p<-ggplot(data=top10Health, aes(x=reorder(EVTYPE,-People), y=People))+
+  geom_bar(stat="identity")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  xlab("Event Types")+
+  ylab("Total Fatalities and Injuries")+
+  ggtitle("Storms Events that are Most Harmful to Population Health")
+p
+```
+### A+
+  theme_light()cross the United States, which types of events have the greatest economic consequences?
+```{r}
+econDataFull$Loss<-as.numeric((econDataFull$PROPDMG))+as.numeric((econDataFull$CROPDMG))
+summaryEcon<-aggregate(Loss~EVTYPE,econDataFull,FUN=sum)
+library(plyr)
+summaryEcon<-arrange(summaryEcon,desc(Loss))
+top10Loss<-head(summaryEcon,10)
+p<-ggplot(data=top10Loss, aes(x=reorder(EVTYPE,-Loss), y=Loss))+
+  geom_bar(stat="identity")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  xlab("Event Types")+
+  ylab("Total Crop Damages and Property Damages (kDollars)")+
+  ggtitle("Storms Events Have the Greatest Economic Consequences")
+p
+```
+## Co+
+  theme_light()nclusion
+Base on analysis between storm event types and 
