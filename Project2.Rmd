@@ -1,11 +1,11 @@
 ---
-title: "Storm Data Analysis Across United States: What Events are Accountable for Population Health and Econmic Losses? "
+title: "Storm Data Analysis Across United States: What Events are Accountable for Population Health and Economic Losses? "
 author: "Shuai"
 date: "11/23/2016"
 output: html_document
 ---
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE,message=F)
 ```
 
 ## Synopsis  
@@ -16,15 +16,16 @@ This analysis focuses on answering two questions: 1) what type of disasters caus
 Results suggest more research efforts should put on prediction and preparation for Tornado events.  
 
 ## Data Processing  
-There are several steps we would like to follow:
-1.  download and save the data as 'stormData.csv.bz2'.
+There are several steps we would like to follow:  
+1.  download and save the data as 'stormData.csv.bz2'.  
+
 ```{r,cache=TRUE}
 data_link<-"https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2"
 if (!file.exists("stormData.csv.bz2")){
 download.file(data_link,destfile = 'stormData.csv.bz2')
 }
 ```
-2.  The extracted csv file is as "stormData.csv". read the csv into data frame. Use data.table's fread() function to enable high efficiency csv reading.
+2.  The extracted csv file is as "stormData.csv". read the csv into data frame. Use data.table's fread() function to enable high efficiency csv reading.  
 ```{r, cache=TRUE}
 library(data.table)
 library(R.utils)
@@ -40,8 +41,8 @@ raw_data<-fread("stormData.csv",header=T)
 summary(raw_data)
 ```
 4.  Data Preparation.  
-  To help analyze results directly related to required questions. I subset the original data into two indepndent dataset. The first question is : "Across the United States, which types of events (as indicated in the 𝙴𝚅𝚃𝚈𝙿𝙴 variable) are most harmful with respect to population health?". In order to answer what *"EVTYPE"* are most *"harmful"* related to *"population health"*. We need to find corresponding variables that are useful. Therefore, we subset the data (using subset() function to select variables of interest). The parameters of intertest are "EVTYPE, FATALITIES, INJURIES, REFUNM"
-  4.1 Population Health Data Preparation
+  To help analyze results directly related to required questions. I subset the original data into two indepndent dataset. The first question is : "Across the United States, which types of events (as indicated in the 𝙴𝚅𝚃𝚈𝙿𝙴 variable) are most harmful with respect to population health?". In order to answer what *"EVTYPE"* are most *"harmful"* related to *"population health"*. We need to find corresponding variables that are useful. Therefore, we subset the data (using subset() function to select variables of interest). The parameters of intertest are "EVTYPE, FATALITIES, INJURIES, REFUNM"  
+  4.1 Population Health Data Preparation  
 ```{r}
 PeopleHealth<-subset(raw_data,select=c(EVTYPE,FATALITIES,INJURIES,REFNUM))
 PeopleHealthFull<-na.omit(PeopleHealth)#get full records
@@ -56,9 +57,8 @@ econDataFull<-na.omit(econData)
 ## Results  
 
 ### Across the United States, which types of events (as indicated in the 𝙴𝚅𝚃𝚈𝙿𝙴 variable) are most harmful with respect to population health?  
-We use histogram to answer this question. Remember PeopleHealth data stores all information we need.
+We use histogram plot to answer this question. Remember PeopleHealth data stores all information we need.  
 ```{r}
-summaryCount<-aggregate(People~EVTYPE,PeopleHealth,FUN=sum)
 altSummary<-aggregate(cbind(FATALITIES,INJURIES)~EVTYPE,PeopleHealth,FUN=sum)
 library(plyr)
 altSummary<-arrange(altSummary,desc(FATALITIES),desc(INJURIES))
@@ -68,30 +68,37 @@ top10Health<-head(altSummary,10)
 Plot the top 10 event types that cause fatalites and injuries:
 ```{r}
 library(ggplot2)
-# Basic barplot
+# Basic barplot by ggplot2
 library(reshape2)
 melted_data<-melt(top10Health,id.vars="EVTYPE")
-p<-ggplot(melted_data,aes(x=reorder(,-value),filEVTYPEl=factor(y=value,variable)))+
+p<-ggplot(melted_data,aes(x=reorder(EVTYPE,-value),y=value,fill=factor(variable)))+
   geom_bar(stat="identity")+
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
   xlab("Event Types")+
-  ylab("Crop and Property Damages (k Dollars)")+
+  ylab("Fatalities and Injuries")+
   ggtitle("Storms Events Affected Population Health")
 print(p)
 ```
-### Across the United States, which types of events have the greatest economic consequences?
+
+### Across the United States, which types of events have the greatest economic consequences?  
+
 ```{r}
 summaryEcon<-aggregate(cbind(PROPDMG,CROPDMG)~EVTYPE,econDataFull,FUN=sum)
 library(plyr)
-summaryEcon<-arrange(summaryEcon,desc(Loss))
+summaryEcon<-arrange(summaryEcon,desc(PROPDMG))
 top10Loss<-head(summaryEcon,10)
-p<-ggplot(data=top10Loss, aes(x=reorder(EVTYPE,-Loss), y=Loss))+
+melted_loss<-melt(top10Loss,id.vars = "EVTYPE")
+p<-ggplot(data=melted_loss, aes(x=reorder(EVTYPE,-value),y=value,fill=factor(variable)))+
   geom_bar(stat="identity")+
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
   xlab("Event Types")+
   ylab("Crop and Property Damages (k Dollars)")+
   ggtitle("Storms Events Have the Greatest Economic Consequences")
-print(p)
+p
 ```
-## Conclusion
-Base on analysis between storm event types versus counts of fatalities and injuries, and event types versus damages to properties and corps, we suggest more research efforts should be put on Tornado events.
+
+## Conclusion  
+
+Base on analysis between storm event types versus counts of fatalities and injuries, and event types versus damages to properties and corps, we suggest more research efforts should go towards Tornado events.  
+
+Regarding mangers who need weather information for crop damages, "Hail" cost crop damages more than other event types.

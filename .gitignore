@@ -9,7 +9,7 @@ __pycache__/
 /rsconnect/
 *.csv
 *.bz2
-/Project2_cache/
+Project2_cache/
 # Distribution / packaging
 .Python
 env/
