@@ -3,6 +3,7 @@ title: "Storm Data Analysis Across United States: What Events are Accountable fo
 author: "Shuai"
 date: "11/23/2016"
 output: html_document
+keep_md: true
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE,message=F)
