@@ -71,12 +71,12 @@ library(ggplot2)
 # Basic barplot
 library(reshape2)
 melted_data<-melt(top10Health,id.vars="EVTYPE")
-p<-ggplot(melted_data,aes(x=variable,y=vreorder(EVTYPEl-value),=factor(gender)))+
- variablebar(stat="identity")+
+p<-ggplot(melted_data,aes(x=reorder(,-value),filEVTYPEl=factor(y=value,variable)))+
+  geom_bar(stat="identity")+
   theme(axis.text.x = element_text(angle = 45, hjust = 1))+
   xlab("Event Types")+
   ylab("Crop and Property Damages (k Dollars)")+
-  ggtitle("Storms Events Have the Greatest Economic Consequences")
+  ggtitle("Storms Events Affected Population Health")
 print(p)
 ```
 ### Across the United States, which types of events have the greatest economic consequences?
